@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, Play, Eye, ExternalLink, RefreshCw } from 'lucide-react';
+import { Search, Filter, Play, Eye, ExternalLink, RefreshCw, Sparkles } from 'lucide-react';
 import AgentTraceModal from '../agent/AgentTraceModal';
 import { recoveryApi } from '../../services/api';
 
@@ -34,30 +34,30 @@ export default function TransactionTable({ transactions = [], total = 0, onRefre
   };
 
   return (
-    <div className="glass-card" style={{ padding: '24px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+    <div className="glass-card" style={{ padding: '20px 24px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
         <div>
-          <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+          <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
             Intercepted Transactions Ledger
           </h3>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            Total {total} failed payment records monitored by recovery agent
+          <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+            Showing {transactions.length} of {total} failed records monitored by autonomous recovery agent
           </p>
         </div>
       </div>
 
-      <div className="table-container">
-        <table className="custom-table">
+      <div className="table-container" style={{ overflowX: 'auto', borderRadius: 'var(--radius-md)' }}>
+        <table className="custom-table" style={{ width: '100%', minWidth: '950px' }}>
           <thead>
             <tr>
-              <th>Payment ID</th>
-              <th>Customer</th>
-              <th>Amount</th>
-              <th>Diagnostic Category</th>
-              <th>Error Code</th>
-              <th>P(Recovery)</th>
-              <th>Status</th>
-              <th style={{ minWidth: '200px' }}>Action</th>
+              <th style={{ width: '150px' }}>Payment ID</th>
+              <th style={{ width: '160px' }}>Customer</th>
+              <th style={{ width: '110px' }}>Amount</th>
+              <th style={{ width: '110px' }}>Category</th>
+              <th style={{ width: '150px' }}>Error Code</th>
+              <th style={{ width: '90px' }}>P(Win)</th>
+              <th style={{ width: '100px' }}>Status</th>
+              <th style={{ width: '160px', textAlign: 'right', paddingRight: '20px' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -68,62 +68,67 @@ export default function TransactionTable({ transactions = [], total = 0, onRefre
               return (
                 <tr key={txn.id}>
                   <td>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: '#38BDF8', fontWeight: 600 }}>
                       {txn.razorpay_payment_id}
                     </div>
-                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)' }}>
                       {txn.payment_method?.toUpperCase()}
                     </div>
                   </td>
                   <td>
-                    <div style={{ fontWeight: 600, color: '#FFFFFF' }}>{txn.customer_name}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{txn.customer_email}</div>
+                    <div style={{ fontWeight: 600, color: '#FFFFFF', fontSize: '0.8rem' }}>{txn.customer_name}</div>
+                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>
+                      {txn.customer_email}
+                    </div>
                   </td>
                   <td>
-                    <div style={{ fontWeight: 700, color: '#FFFFFF', fontSize: '0.9rem' }}>
+                    <div style={{ fontWeight: 700, color: '#FFFFFF', fontSize: '0.85rem' }}>
                       ₹{(txn.amount_paise / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </div>
                   </td>
                   <td>
-                    <span className="badge badge-transient" style={{ fontSize: '0.7rem' }}>
+                    <span className="badge badge-transient" style={{ fontSize: '0.65rem', padding: '2px 6px' }}>
                       {txn.failure_category || 'Transient'}
                     </span>
                   </td>
                   <td>
-                    <div style={{ fontSize: '0.75rem', color: '#FB7185', fontWeight: 500, maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div 
+                      title={txn.error_code}
+                      style={{ fontSize: '0.7rem', color: '#FB7185', fontWeight: 500, maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                    >
                       {txn.error_code}
                     </div>
                   </td>
                   <td>
-                    <div style={{ fontWeight: 700, color: 'var(--accent-emerald)', fontSize: '0.85rem' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--accent-emerald)', fontSize: '0.8rem' }}>
                       {Math.round((txn.recovery_probability || 0.6) * 100)}%
                     </div>
                   </td>
                   <td>
-                    <span className={`badge badge-${status === 'recovered' ? 'recovered' : status === 'recovering' ? 'recovering' : status === 'paused_hitl' ? 'hitl' : 'failed'}`}>
+                    <span className={`badge badge-${status === 'recovered' ? 'recovered' : status === 'recovering' ? 'recovering' : status === 'paused_hitl' ? 'hitl' : 'failed'}`} style={{ fontSize: '0.65rem', padding: '2px 6px' }}>
                       {status}
                     </span>
                   </td>
-                  <td style={{ minWidth: '200px', whiteSpace: 'nowrap' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <td style={{ textAlign: 'right', paddingRight: '20px' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
                       {status === 'failed' && (
                         <button
                           onClick={() => handleRecover(txn.id)}
                           className="btn-primary"
-                          style={{ padding: '6px 12px', fontSize: '0.75rem', whiteSpace: 'nowrap' }}
+                          style={{ padding: '5px 9px', fontSize: '0.72rem', whiteSpace: 'nowrap' }}
                           disabled={isRecovering}
                         >
-                          <Play size={12} /> {isRecovering ? '...' : 'Recover'}
+                          <Play size={11} /> {isRecovering ? '...' : 'Recover'}
                         </button>
                       )}
                       
                       <button
                         onClick={() => handleViewTrace(txn)}
                         className="btn-secondary"
-                        style={{ padding: '6px 12px', fontSize: '0.75rem', whiteSpace: 'nowrap' }}
+                        style={{ padding: '5px 9px', fontSize: '0.72rem', whiteSpace: 'nowrap' }}
                         title="View LangGraph Agent Reasoning Trace"
                       >
-                        <Eye size={12} /> Trace
+                        <Eye size={11} /> Trace
                       </button>
                     </div>
                   </td>
