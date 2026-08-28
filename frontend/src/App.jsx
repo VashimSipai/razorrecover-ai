@@ -1,5 +1,8 @@
-import Store from './pages/Store';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Sidebar from './components/layout/Sidebar';
 import Dashboard from './pages/Dashboard';
+import Store from './pages/Store';
 import Approvals from './pages/Approvals';
 import Transactions from './pages/Transactions';
 import Benchmark from './pages/Benchmark';
