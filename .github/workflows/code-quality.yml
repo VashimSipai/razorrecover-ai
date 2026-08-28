@@ -1,0 +1,58 @@
+name: Code Quality & Security Guardrails
+
+on:
+  push:
+    branches: [ main, "feature/*" ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  ACTIONS_RUNNER_FORCE_NODE24: "true"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE20: "false"
+
+jobs:
+  lint-and-syntax:
+    name: 🔍 Python & Frontend Syntax Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate Python Syntax & AST Compilation
+        run: |
+          python -m py_compile $(find backend/app -name "*.py")
+          echo "All Python backend modules compiled with 0 syntax errors."
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate Frontend Package Integrity
+        run: |
+          cd frontend
+          npm pkg fix --dry-run
+          echo "Frontend package.json integrity verified."
+
+  secret-guard:
+    name: 🛡️ Secret Leak & .gitignore Guard
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check for Uncommitted .env or Secret Files
+        run: |
+          if git ls-files | grep -E '\.env$|\.key$|\.pem$'; then
+            echo "❌ ERROR: Detected secret file in Git index!"
+            exit 1
+          else
+            echo "✅ Verified: Zero secret files tracked in Git."
+          fi
