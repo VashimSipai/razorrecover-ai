@@ -3,6 +3,7 @@ import Header from '../components/layout/Header';
 import MetricsGrid from '../components/dashboard/MetricsGrid';
 import RecoveryFunnel from '../components/dashboard/RecoveryFunnel';
 import FailureBreakdown from '../components/dashboard/FailureBreakdown';
+import RevenueChart from '../components/dashboard/RevenueChart';
 import TransactionTable from '../components/transactions/TransactionTable';
 import LiveAgentFlowVisualizer from '../components/agent/LiveAgentFlowVisualizer';
 import { recoveryApi } from '../services/api';
@@ -57,6 +58,9 @@ export default function Dashboard() {
 
         {/* KPI Metrics */}
         <MetricsGrid kpis={kpis} />
+
+        {/* Time-Series Recovery Velocity Chart */}
+        <RevenueChart />
 
         {/* Funnel & Taxonomy Breakdown Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px', marginBottom: '32px' }}>
