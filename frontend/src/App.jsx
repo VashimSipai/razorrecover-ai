@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Sidebar from './components/layout/Sidebar';
+import Store from './pages/Store';
 import Dashboard from './pages/Dashboard';
 import Approvals from './pages/Approvals';
 import Transactions from './pages/Transactions';
@@ -33,6 +31,7 @@ export default function App() {
         <Sidebar pendingCount={pendingApprovalsCount} />
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/store" element={<Store />} />
           <Route path="/approvals" element={<Approvals onUpdatePending={setPendingApprovalsCount} />} />
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/benchmark" element={<Benchmark />} />

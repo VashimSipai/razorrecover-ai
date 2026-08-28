@@ -34,6 +34,10 @@ export const recoveryApi = {
   // Simulator
   simulatePaymentFailure: (payload) => api.post('/simulate/failure', payload).then(res => res.data),
   
+  // Store Demo
+  createStoreOrder: (payload) => api.post('/store/order', payload).then(res => res.data),
+  reportStorePaymentFailure: (payload) => api.post('/store/payment-failure', payload).then(res => res.data),
+
   // Policies
   getPolicyConfig: () => api.get('/policies').then(res => res.data),
   updatePolicyConfig: (payload) => api.put('/policies', payload).then(res => res.data),

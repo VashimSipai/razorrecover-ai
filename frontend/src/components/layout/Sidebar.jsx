@@ -14,6 +14,7 @@ import {
 export default function Sidebar({ pendingCount = 0 }) {
   const navItems = [
     { to: '/', label: 'Overview', icon: LayoutDashboard },
+    { to: '/store', label: 'Live Checkout Store', icon: Zap },
     { to: '/approvals', label: 'HITL Approvals', icon: ShieldCheck, badge: pendingCount },
     { to: '/transactions', label: 'Transactions', icon: Receipt },
     { to: '/benchmark', label: '2.5k Benchmark', icon: BarChart3 },

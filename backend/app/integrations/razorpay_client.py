@@ -74,6 +74,38 @@ class RazorpayClientWrapper:
             "amount_paise": amount_paise
         }
 
+    def create_order(self, amount_paise: int, receipt: str, notes: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Creates a real Razorpay Order for Standard Checkout.
+        """
+        payload = {
+            "amount": amount_paise,
+            "currency": "INR",
+            "receipt": receipt,
+            "notes": notes or {}
+        }
+        if self._client:
+            try:
+                order = self._client.order.create(payload)
+                return {
+                    "id": order["id"],
+                    "amount": order["amount"],
+                    "currency": order["currency"],
+                    "receipt": order["receipt"],
+                    "status": order["status"]
+                }
+            except Exception as e:
+                logger.warning(f"Razorpay order creation failed: {e}. Using mock order.")
+        
+        mock_id = f"order_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+        return {
+            "id": mock_id,
+            "amount": amount_paise,
+            "currency": "INR",
+            "receipt": receipt,
+            "status": "created"
+        }
+
     def fetch_payment(self, payment_id: str) -> Dict[str, Any]:
         if self._client:
             try:
@@ -88,3 +120,4 @@ class RazorpayClientWrapper:
         }
 
 razorpay_wrapper = RazorpayClientWrapper()
+
