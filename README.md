@@ -1,7 +1,7 @@
 # RazorRecover AI — Autonomous Revenue Recovery Engine 🚀
 
 > **Official Razorpay AI Buildathon Submission (Track 03: AI Revenue Recovery)**  
-> Built by: B.Tech Computer Engineering AI Builder  
+> **Author:** Mohamadvashim Manjurhushen Sipai (Vashim Sipai)  
 > Stack: **FastAPI + LangGraph State Machines + Gemini 2.5 Flash + React (Vite) + Razorpay SDK**
 
 [![CI & Evaluation](https://github.com/vashimsipai/razorrecover-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/vashimsipai/razorrecover-ai/actions)
