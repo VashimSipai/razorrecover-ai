@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from app.core.database import get_db
 from app.core.models import Transaction, RecoveryAction
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/recover", tags=["Recovery Engine"])
 @router.post("/{txn_id}", response_model=Dict[str, Any])
 async def recover_single_transaction(
     txn_id: str,
-    payload: RecoveryRequest = None,
+    payload: Optional[RecoveryRequest] = Body(default=None),
     db: AsyncSession = Depends(get_db)
 ):
     """

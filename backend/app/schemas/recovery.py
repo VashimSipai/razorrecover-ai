@@ -3,7 +3,7 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 class RecoveryRequest(BaseModel):
-    transaction_id: str
+    transaction_id: Optional[str] = None
     force_strategy: Optional[str] = None
     allow_discount: bool = True
     discount_percent: int = Field(default=0, ge=0, le=20)
