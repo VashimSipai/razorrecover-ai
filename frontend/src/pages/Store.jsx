@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/layout/Header';
 import { ShoppingBag, CreditCard, CheckCircle2, AlertTriangle, ArrowRight, ShieldCheck, Zap, Sparkles, MessageSquare } from 'lucide-react';
 import { recoveryApi } from '../services/api';
+import CustomerPhoneMockup from '../components/demo/CustomerPhoneMockup';
 
 export default function Store() {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -125,7 +126,7 @@ export default function Store() {
         });
         rzp.open();
       } else {
-        // Fallback if Razorpay SDK script isn't loaded
+        // Fallback simulation
         const failureData = await recoveryApi.reportStorePaymentFailure({
           razorpay_payment_id: `pay_chk_${Date.now()}`,
           razorpay_order_id: orderData.order_id,
@@ -142,7 +143,7 @@ export default function Store() {
         setIsProcessing(false);
       }
     } catch (err) {
-      console.error("Checkout initiation error:", err);
+      console.error("Checkout error:", err);
       setIsProcessing(false);
     }
   };
@@ -150,16 +151,16 @@ export default function Store() {
   return (
     <div className="main-content">
       <Header
-        title="Live Merchant Store & Real Checkout Experience"
-        subtitle="Test real Razorpay Checkout modal popups, trigger live failures, and watch autonomous AI recovery in real time"
+        title="Live Merchant Store & Customer Phone Experience"
+        subtitle="Trigger a payment failure in Razorpay Checkout and watch the customer's phone receive the WhatsApp recovery nudge live"
       />
 
       <div className="page-wrapper">
         {/* Customer Prefill Configuration Card */}
-        <div className="glass-card" style={{ padding: '20px 24px', marginBottom: '28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+        <div className="glass-card" style={{ padding: '18px 24px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
           <div>
             <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#FFFFFF' }}>
-              👤 Customer Session (Prefilled on Checkout)
+              👤 Customer Session (Prefilled into Razorpay Checkout)
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
               {customerName} • {customerEmail} • {customerPhone}
@@ -172,7 +173,7 @@ export default function Store() {
               onChange={e => setCustomerName(e.target.value)}
               placeholder="Name"
               className="input-field"
-              style={{ width: '140px', padding: '6px 10px', fontSize: '0.8rem' }}
+              style={{ width: '130px', padding: '6px 10px', fontSize: '0.75rem' }}
             />
             <input
               type="text"
@@ -180,109 +181,105 @@ export default function Store() {
               onChange={e => setCustomerPhone(e.target.value)}
               placeholder="Phone"
               className="input-field"
-              style={{ width: '140px', padding: '6px 10px', fontSize: '0.8rem' }}
+              style={{ width: '130px', padding: '6px 10px', fontSize: '0.75rem' }}
             />
           </div>
         </div>
 
-        {/* Product Cards Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '36px' }}>
-          {products.map((prod) => (
-            <div key={prod.id} className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative' }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '3px 8px', borderRadius: '9999px', background: `${prod.badgeColor}22`, color: prod.badgeColor, border: `1px solid ${prod.badgeColor}44` }}>
-                    {prod.badge}
-                  </span>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFFFFF' }}>
-                    ₹{prod.amount_inr.toLocaleString('en-IN')}
+        {/* Store Products & Virtual Phone Split Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '28px', alignItems: 'flex-start' }}>
+          {/* Left Column: Products & Telemetry */}
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '18px', marginBottom: '24px' }}>
+              {products.map((prod) => (
+                <div key={prod.id} className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '2px 8px', borderRadius: '9999px', background: `${prod.badgeColor}22`, color: prod.badgeColor, border: `1px solid ${prod.badgeColor}44` }}>
+                        {prod.badge}
+                      </span>
+                      <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF' }}>
+                        ₹{prod.amount_inr.toLocaleString('en-IN')}
+                      </div>
+                    </div>
+
+                    <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '6px' }}>
+                      {prod.name}
+                    </h3>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '20px' }}>
+                      {prod.description}
+                    </p>
                   </div>
+
+                  <button
+                    onClick={() => handleStartCheckout(prod)}
+                    className="btn-primary"
+                    style={{ width: '100%', justifyContent: 'center', padding: '10px', fontSize: '0.8rem' }}
+                    disabled={isProcessing}
+                  >
+                    <CreditCard size={14} />
+                    <span>{isProcessing && selectedProduct?.id === prod.id ? 'Opening Modal...' : 'Pay with Razorpay Modal'}</span>
+                  </button>
                 </div>
-
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>
-                  {prod.name}
-                </h3>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '24px' }}>
-                  {prod.description}
-                </p>
-              </div>
-
-              <button
-                onClick={() => handleStartCheckout(prod)}
-                className="btn-primary"
-                style={{ width: '100%', justifyContent: 'center', padding: '12px' }}
-                disabled={isProcessing}
-              >
-                <CreditCard size={16} />
-                <span>{isProcessing && selectedProduct?.id === prod.id ? 'Opening Razorpay Modal...' : 'Pay with Razorpay Modal'}</span>
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Live Autonomous Recovery Card Triggered from Checkout */}
-        {liveRecoveryResult && (
-          <div className="glass-card glass-card-glow" style={{ padding: '32px', border: '1px solid rgba(99, 102, 241, 0.4)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-              <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.2)', border: '1px solid #6366F1' }}>
-                <Sparkles size={20} color="#6366F1" />
-              </div>
-              <div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#FFFFFF' }}>
-                  ⚡ Live Checkout Payment Failure Intercepted & Recovered!
-                </h3>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  The Razorpay Checkout modal triggered a failure event. LangGraph immediately took action:
-                </p>
-              </div>
+              ))}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '20px' }}>
-              <div style={{ background: 'var(--bg-tertiary)', padding: '14px', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Policy Gate Decision</div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: liveRecoveryResult.policy_result === 'paused_hitl' ? '#FBBF24' : 'var(--accent-emerald)', marginTop: '4px' }}>
-                  {liveRecoveryResult.policy_result.toUpperCase()}
+            {/* Live Autonomous Recovery Card */}
+            {liveRecoveryResult && (
+              <div className="glass-card glass-card-glow" style={{ padding: '24px', border: '1px solid rgba(99, 102, 241, 0.4)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                  <Sparkles size={18} color="#6366F1" />
+                  <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#FFFFFF' }}>
+                    ⚡ Payment Drop Intercepted & Dispatched to Customer Phone!
+                  </h4>
                 </div>
-              </div>
 
-              <div style={{ background: 'var(--bg-tertiary)', padding: '14px', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Intervention Strategy</div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#38BDF8', textTransform: 'capitalize', marginTop: '4px' }}>
-                  {liveRecoveryResult.strategy?.replace('_', ' ')}
-                </div>
-              </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                  <div style={{ background: 'var(--bg-tertiary)', padding: '10px', borderRadius: 'var(--radius-md)' }}>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Policy Gate</div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: liveRecoveryResult.policy_result === 'paused_hitl' ? '#FBBF24' : 'var(--accent-emerald)', marginTop: '2px' }}>
+                      {liveRecoveryResult.policy_result.toUpperCase()}
+                    </div>
+                  </div>
 
-              <div style={{ background: 'var(--bg-tertiary)', padding: '14px', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>P(Recovery) Likelihood</div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--accent-emerald)', marginTop: '4px' }}>
-                  {Math.round((liveRecoveryResult.recovery_probability || 0.75) * 100)}% Win Probability
-                </div>
-              </div>
+                  <div style={{ background: 'var(--bg-tertiary)', padding: '10px', borderRadius: 'var(--radius-md)' }}>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>AI Strategy</div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#38BDF8', textTransform: 'capitalize', marginTop: '2px' }}>
+                      {liveRecoveryResult.strategy?.replace('_', ' ')}
+                    </div>
+                  </div>
 
-              <div style={{ background: 'var(--bg-tertiary)', padding: '14px', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Generated Resource</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#FFFFFF', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
-                  {liveRecoveryResult.razorpay_resource_id}
-                </div>
-              </div>
-            </div>
-
-            {/* Live WhatsApp Bubble */}
-            {liveRecoveryResult.notification_message && (
-              <div style={{ background: 'rgba(18, 140, 126, 0.12)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid rgba(37, 211, 102, 0.3)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <MessageSquare size={16} color="#25D366" />
-                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#25D366' }}>
-                    Automated Customer WhatsApp Nudge Dispatched
-                  </span>
-                </div>
-                <div style={{ background: 'rgba(7, 9, 14, 0.7)', padding: '12px 14px', borderRadius: '8px', fontSize: '0.85rem', color: '#FFFFFF', lineHeight: 1.5, borderLeft: '3px solid #25D366' }}>
-                  {liveRecoveryResult.notification_message}
+                  <div style={{ background: 'var(--bg-tertiary)', padding: '10px', borderRadius: 'var(--radius-md)' }}>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>P(Recovery)</div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-emerald)', marginTop: '2px' }}>
+                      {Math.round((liveRecoveryResult.recovery_probability || 0.75) * 100)}% Win Prob
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
           </div>
-        )}
+
+          {/* Right Column: Virtual Customer Phone Device */}
+          <div>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              📱 Customer's Smartphone
+            </div>
+            <CustomerPhoneMockup
+              notification={liveRecoveryResult}
+              customerName={customerName}
+              onRecoveryComplete={() => {
+                // Trigger live status update
+                if (liveRecoveryResult) {
+                  setLiveRecoveryResult({
+                    ...liveRecoveryResult,
+                    status: 'recovered'
+                  });
+                }
+              }}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

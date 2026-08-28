@@ -4,6 +4,7 @@ import MetricsGrid from '../components/dashboard/MetricsGrid';
 import RecoveryFunnel from '../components/dashboard/RecoveryFunnel';
 import FailureBreakdown from '../components/dashboard/FailureBreakdown';
 import TransactionTable from '../components/transactions/TransactionTable';
+import LiveAgentFlowVisualizer from '../components/agent/LiveAgentFlowVisualizer';
 import { recoveryApi } from '../services/api';
 
 export default function Dashboard() {
@@ -51,6 +52,9 @@ export default function Dashboard() {
       />
 
       <div className="page-wrapper">
+        {/* Multi-Agent Live Execution Pipeline Flow */}
+        <LiveAgentFlowVisualizer activeStep={5} latencyMs={18} />
+
         {/* KPI Metrics */}
         <MetricsGrid kpis={kpis} />
 
