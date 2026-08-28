@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Terminal, Send, CheckCircle2, AlertTriangle, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { Terminal, Send, CheckCircle2, AlertTriangle, ArrowRight, ShieldCheck, Zap, MessageSquare, Clock, CreditCard, Sparkles } from 'lucide-react';
 import { recoveryApi } from '../../services/api';
 
 export default function WebhookSimulator({ onSimulationSuccess }) {
@@ -55,7 +55,7 @@ export default function WebhookSimulator({ onSimulationSuccess }) {
     try {
       const data = await recoveryApi.simulatePaymentFailure({
         customer_name: customerName,
-        customer_email: `${customerName.toLowerCase().replace(' ', '.')}@example.com`,
+        customer_email: `${customerName.toLowerCase().replace(/\s+/g, '.')}@example.in`,
         customer_phone: customerPhone,
         amount_inr: Number(amountInr),
         payment_method: paymentMethod,
@@ -72,8 +72,8 @@ export default function WebhookSimulator({ onSimulationSuccess }) {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '28px' }}>
-      {/* Simulation Form */}
+    <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1.1fr', gap: '28px' }}>
+      {/* Simulation Input Form */}
       <div className="glass-card" style={{ padding: '32px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
           <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
@@ -84,12 +84,12 @@ export default function WebhookSimulator({ onSimulationSuccess }) {
               Razorpay Webhook Event Injector
             </h3>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              Simulate real-time `payment.failed` webhooks to test autonomous recovery
+              Simulate live `payment.failed` webhooks to test autonomous recovery
             </p>
           </div>
         </div>
 
-        {/* Quick Presets */}
+        {/* Quick Demo Presets */}
         <div style={{ marginBottom: '24px' }}>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 600 }}>
             Quick Demo Scenarios
@@ -163,14 +163,14 @@ export default function WebhookSimulator({ onSimulationSuccess }) {
                 onChange={e => setErrorCode(e.target.value)}
                 className="input-field"
               >
-                <option value="BAD_REQUEST_PAYMENT_TIMED_OUT">BAD_REQUEST_PAYMENT_TIMED_OUT</option>
-                <option value="GATEWAY_ERROR">GATEWAY_ERROR</option>
-                <option value="GATEWAY_ERROR_INSUFFICIENT_FUNDS">GATEWAY_ERROR_INSUFFICIENT_FUNDS</option>
-                <option value="GATEWAY_ERROR_TRANSACTION_LIMIT_EXCEEDED">GATEWAY_ERROR_TRANSACTION_LIMIT_EXCEEDED</option>
-                <option value="AUTHENTICATION_FAILED_3DS">AUTHENTICATION_FAILED_3DS</option>
+                <option value="BAD_REQUEST_PAYMENT_TIMED_OUT">BAD_REQUEST_PAYMENT_TIMED_OUT (Transient)</option>
+                <option value="GATEWAY_ERROR">GATEWAY_ERROR (Transient)</option>
+                <option value="GATEWAY_ERROR_INSUFFICIENT_FUNDS">GATEWAY_ERROR_INSUFFICIENT_FUNDS (Soft Decline)</option>
+                <option value="GATEWAY_ERROR_TRANSACTION_LIMIT_EXCEEDED">GATEWAY_ERROR_TRANSACTION_LIMIT_EXCEEDED (Soft Decline)</option>
+                <option value="AUTHENTICATION_FAILED_3DS">AUTHENTICATION_FAILED_3DS (Auth Failure)</option>
                 <option value="BAD_REQUEST_PAYMENT_CANCELLED_BY_CUSTOMER">BAD_REQUEST_PAYMENT_CANCELLED_BY_CUSTOMER</option>
-                <option value="GATEWAY_ERROR_CARD_BLOCKED">GATEWAY_ERROR_CARD_BLOCKED</option>
-                <option value="MANDATE_EXECUTION_FAILED">MANDATE_EXECUTION_FAILED</option>
+                <option value="GATEWAY_ERROR_CARD_BLOCKED">GATEWAY_ERROR_CARD_BLOCKED (Hard Decline)</option>
+                <option value="MANDATE_EXECUTION_FAILED">MANDATE_EXECUTION_FAILED (Mandate)</option>
               </select>
             </div>
           </div>
@@ -182,30 +182,56 @@ export default function WebhookSimulator({ onSimulationSuccess }) {
             disabled={isSubmitting}
           >
             <Send size={16} />
-            <span>{isSubmitting ? 'Injecting & Recovering...' : 'Inject Webhook & Execute Agent'}</span>
+            <span>{isSubmitting ? 'Simulating Failure & Executing AI Engine...' : 'Inject Webhook & Execute AI Recovery'}</span>
           </button>
         </form>
       </div>
 
-      {/* Real-time Agent Result Card */}
+      {/* Real-time AI Autonomous Stream */}
       <div className="glass-card" style={{ padding: '32px', display: 'flex', flexDirection: 'column' }}>
-        <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#FFFFFF', marginBottom: '16px' }}>
-          Autonomous Execution Stream
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#FFFFFF' }}>
+            Autonomous Recovery Stream
+          </h3>
+          <span style={{ fontSize: '0.7rem', padding: '4px 8px', borderRadius: '6px', background: 'rgba(99, 102, 241, 0.15)', color: '#A5B4FC', fontWeight: 600 }}>
+            LangGraph Multi-Agent
+          </span>
+        </div>
 
         {simulationResult ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+            {/* Status Header Pill */}
             <div style={{
               padding: '14px',
               borderRadius: 'var(--radius-md)',
               background: simulationResult.recovery?.policy_result === 'paused_hitl' 
-                ? 'rgba(245, 158, 11, 0.1)' 
-                : 'rgba(16, 185, 129, 0.1)',
-              border: `1px solid ${simulationResult.recovery?.policy_result === 'paused_hitl' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`
+                ? 'rgba(245, 158, 11, 0.12)' 
+                : simulationResult.recovery?.policy_result === 'blocked'
+                ? 'rgba(244, 63, 94, 0.12)'
+                : 'rgba(16, 185, 129, 0.12)',
+              border: `1px solid ${
+                simulationResult.recovery?.policy_result === 'paused_hitl' 
+                  ? 'rgba(245, 158, 11, 0.3)' 
+                  : simulationResult.recovery?.policy_result === 'blocked'
+                  ? 'rgba(244, 63, 94, 0.3)'
+                  : 'rgba(16, 185, 129, 0.3)'
+              }`
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: simulationResult.recovery?.policy_result === 'paused_hitl' ? '#FBBF24' : '#34D399' }}>
-                  {simulationResult.recovery?.policy_result === 'paused_hitl' ? 'PAUSED FOR HITL APPROVAL' : 'RECOVERY ACTION DISPATCHED'}
+                <span style={{
+                  fontSize: '0.85rem',
+                  fontWeight: 800,
+                  color: simulationResult.recovery?.policy_result === 'paused_hitl' 
+                    ? '#FBBF24' 
+                    : simulationResult.recovery?.policy_result === 'blocked'
+                    ? '#FB7185'
+                    : '#34D399'
+                }}>
+                  {simulationResult.recovery?.policy_result === 'paused_hitl' 
+                    ? '⏸️ PAUSED FOR HUMAN APPROVAL' 
+                    : simulationResult.recovery?.policy_result === 'blocked'
+                    ? '🚫 INTERVENTION BLOCKED BY POLICY'
+                    : '⚡ RECOVERY ACTION DISPATCHED'}
                 </span>
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                   ID: {simulationResult.transaction_id}
@@ -213,44 +239,94 @@ export default function WebhookSimulator({ onSimulationSuccess }) {
               </div>
             </div>
 
+            {/* Strategy & Scoring Summary */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div style={{ background: 'var(--bg-tertiary)', padding: '12px', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Strategy</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#38BDF8', textTransform: 'capitalize' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>AI Proposed Strategy</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#38BDF8', textTransform: 'capitalize', marginTop: '2px' }}>
                   {simulationResult.recovery?.strategy?.replace('_', ' ')}
                 </div>
               </div>
               <div style={{ background: 'var(--bg-tertiary)', padding: '12px', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>P(Recovery)</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-emerald)' }}>
-                  {Math.round((simulationResult.recovery?.probability || 0.75) * 100)}%
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Recovery Likelihood</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--accent-emerald)', marginTop: '2px' }}>
+                  {Math.round((simulationResult.recovery?.probability || 0.75) * 100)}% P(Recovery)
                 </div>
               </div>
             </div>
 
-            {simulationResult.recovery?.payment_url && (
-              <div style={{ background: 'var(--bg-tertiary)', padding: '14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Generated Payment Link</div>
-                <a
-                  href={simulationResult.recovery.payment_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{ fontSize: '0.8rem', color: 'var(--accent-accent)', wordBreak: 'break-all', fontWeight: 600 }}
-                >
-                  {simulationResult.recovery.payment_url}
-                </a>
+            {/* AI Reasoning Box */}
+            {simulationResult.recovery?.agent_reasoning && (
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                padding: '12px 14px',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-subtle)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#A5B4FC', fontWeight: 600, marginBottom: '4px' }}>
+                  <Sparkles size={14} /> AI Diagnostic Reasoning
+                </div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                  {simulationResult.recovery.agent_reasoning}
+                </p>
               </div>
             )}
 
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 'auto', background: 'rgba(255, 255, 255, 0.02)', padding: '12px', borderRadius: 'var(--radius-md)' }}>
-              Engine: {simulationResult.recovery?.execution_engine} • Policy Result: {simulationResult.recovery?.policy_result}
+            {/* Generated Action Details (Razorpay Resource) */}
+            <div style={{
+              background: 'var(--bg-tertiary)',
+              padding: '12px 14px',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-subtle)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#F8FAFC', fontWeight: 600, marginBottom: '6px' }}>
+                <CreditCard size={14} color="#38BDF8" /> Generated Razorpay Resource
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                <span>Resource Type: <strong style={{ color: '#FFFFFF' }}>{simulationResult.recovery?.razorpay_resource_type || 'payment_link'}</strong></span>
+                <span>Resource ID: <strong style={{ color: '#38BDF8', fontFamily: 'var(--font-mono)' }}>{simulationResult.recovery?.razorpay_resource_id || 'plink_rec_test'}</strong></span>
+              </div>
+            </div>
+
+            {/* Live WhatsApp Customer Nudge Simulator */}
+            {simulationResult.recovery?.notification_message && (
+              <div style={{
+                background: 'rgba(18, 140, 126, 0.1)',
+                padding: '14px',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid rgba(37, 211, 102, 0.3)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <MessageSquare size={16} color="#25D366" />
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#25D366' }}>
+                    Customer WhatsApp Nudge (Dispatched)
+                  </span>
+                </div>
+                <div style={{
+                  background: 'rgba(7, 9, 14, 0.6)',
+                  padding: '10px 12px',
+                  borderRadius: '8px',
+                  fontSize: '0.8rem',
+                  color: '#FFFFFF',
+                  lineHeight: 1.5,
+                  borderLeft: '3px solid #25D366'
+                }}>
+                  {simulationResult.recovery.notification_message}
+                </div>
+              </div>
+            )}
+
+            {/* Engine Telemetry */}
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 'auto', display: 'flex', justifyContent: 'space-between' }}>
+              <span>Engine: <strong>{simulationResult.recovery?.execution_engine}</strong></span>
+              <span>Policy Status: <strong style={{ color: 'var(--accent-emerald)' }}>{simulationResult.recovery?.policy_result}</strong></span>
             </div>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--text-muted)', textAlign: 'center' }}>
-            <Zap size={32} style={{ marginBottom: '12px', opacity: 0.3 }} />
-            <p style={{ fontSize: '0.85rem' }}>
-              Select a scenario or enter custom parameters and click Inject to witness real-time autonomous reasoning.
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--text-muted)', textAlign: 'center', padding: '40px 0' }}>
+            <Zap size={36} style={{ marginBottom: '12px', opacity: 0.3 }} color="#6366F1" />
+            <p style={{ fontSize: '0.85rem', maxWidth: '320px' }}>
+              Select a scenario on the left and click <strong>Inject Webhook</strong> to watch real-time AI reasoning, Razorpay resource creation, and WhatsApp nudges.
             </p>
           </div>
         )}

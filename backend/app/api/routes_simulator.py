@@ -66,12 +66,29 @@ async def simulate_payment_failure(
     recovery_data = None
     if payload.auto_recover:
         action, updated_txn = await dispatcher.process_recovery(db=db, transaction=txn)
+        
+        notification_text = None
+        if action.payment_url:
+            notification_text = (
+                f"Hi {payload.customer_name}, your payment of ₹{payload.amount_inr:,.2f} "
+                f"for Order {payment_id} was interrupted. Tap here to complete securely via UPI or Card: {action.payment_url}"
+            )
+        elif action.strategy in ["smart_retry", "mandate_retry"]:
+            notification_text = (
+                f"Hi {payload.customer_name}, we noticed a temporary bank gateway timeout for ₹{payload.amount_inr:,.2f}. "
+                f"Our system has automatically scheduled an order re-presentation. No action needed!"
+            )
+
         recovery_data = {
             "action_id": action.id,
             "strategy": action.strategy,
+            "agent_reasoning": action.agent_reasoning,
             "policy_result": action.policy_gate_result,
             "policy_reason": action.policy_gate_reason,
+            "razorpay_resource_id": action.razorpay_resource_id,
+            "razorpay_resource_type": action.razorpay_resource_type,
             "payment_url": action.payment_url,
+            "notification_message": notification_text,
             "execution_engine": action.execution_engine,
             "status": updated_txn.status,
             "probability": updated_txn.recovery_probability
