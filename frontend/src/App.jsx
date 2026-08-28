@@ -9,6 +9,7 @@ import Benchmark from './pages/Benchmark';
 import Simulator from './pages/Simulator';
 import Settings from './pages/Settings';
 import { recoveryApi } from './services/api';
+import { usePolling } from './hooks/usePolling';
 
 export default function App() {
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
@@ -22,11 +23,8 @@ export default function App() {
     }
   };
 
-  useEffect(() => {
-    fetchPendingCount();
-    const interval = setInterval(fetchPendingCount, 15000);
-    return () => clearInterval(interval);
-  }, []);
+  // Automatically poll pending approval counts every 15 seconds
+  usePolling(fetchPendingCount, 15000);
 
   return (
     <Router>

@@ -3,6 +3,7 @@ import Header from '../components/layout/Header';
 import { ShoppingBag, CreditCard, CheckCircle2, AlertTriangle, ArrowRight, ShieldCheck, Zap, Sparkles, MessageSquare, Flame } from 'lucide-react';
 import { recoveryApi } from '../services/api';
 import CustomerPhoneMockup from '../components/demo/CustomerPhoneMockup';
+import AgentThinking from '../components/agent/AgentThinking';
 
 export default function Store() {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -184,6 +185,12 @@ export default function Store() {
         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 340px', gap: '28px', alignItems: 'flex-start' }}>
           {/* Left Column: Products & Telemetry */}
           <div>
+            {isProcessing && (
+              <div style={{ marginBottom: '18px' }}>
+                <AgentThinking message="LangGraph Multi-Agent Supervisor is formulating bounded recovery strategy..." />
+              </div>
+            )}
+            
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '18px', marginBottom: '24px' }}>
               {products.map((prod) => (
                 <div key={prod.id} className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>

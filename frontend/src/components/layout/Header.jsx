@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Download, RefreshCw, Activity, Play, Sparkles } from 'lucide-react';
+import { ShieldCheck, Download, RefreshCw, Activity, Play, Sparkles, FileText } from 'lucide-react';
 import { recoveryApi } from '../../services/api';
 import GuidedTourModal from '../demo/GuidedTourModal';
+import ComplianceReportModal from '../compliance/ComplianceReportModal';
 
 export default function Header({ title, subtitle, onRefresh, isRefreshing = false }) {
   const [showGuidedTour, setShowGuidedTour] = useState(false);
-
-  const handleExportCSV = () => {
-    window.open(recoveryApi.getComplianceExportUrl('csv'), '_blank');
-  };
+  const [showComplianceModal, setShowComplianceModal] = useState(false);
 
   return (
     <>
@@ -80,20 +78,24 @@ export default function Header({ title, subtitle, onRefresh, isRefreshing = fals
             </button>
           )}
 
-          {/* Download Compliance CSV Button */}
+          {/* Download Compliance Audit Modal Button */}
           <button 
-            onClick={handleExportCSV}
+            onClick={() => setShowComplianceModal(true)}
             className="btn-secondary"
             style={{ padding: '8px 14px', fontSize: '0.8rem' }}
           >
-            <Download size={14} />
-            <span>Compliance CSV</span>
+            <ShieldCheck size={14} color="#10B981" />
+            <span>Compliance Audit</span>
           </button>
         </div>
       </header>
 
       {showGuidedTour && (
         <GuidedTourModal onClose={() => setShowGuidedTour(false)} />
+      )}
+
+      {showComplianceModal && (
+        <ComplianceReportModal onClose={() => setShowComplianceModal(false)} />
       )}
     </>
   );

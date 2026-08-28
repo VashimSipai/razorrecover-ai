@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Terminal, Send, CheckCircle2, AlertTriangle, ArrowRight, ShieldCheck, Zap, MessageSquare, Clock, CreditCard, Sparkles } from 'lucide-react';
 import { recoveryApi } from '../../services/api';
+import AgentThinking from '../agent/AgentThinking';
 
 export default function WebhookSimulator({ onSimulationSuccess }) {
   const [customerName, setCustomerName] = useState('Pooja Mehta');
@@ -184,6 +185,12 @@ export default function WebhookSimulator({ onSimulationSuccess }) {
             <Send size={16} />
             <span>{isSubmitting ? 'Simulating Failure & Executing AI Engine...' : 'Inject Webhook & Execute AI Recovery'}</span>
           </button>
+
+          {isSubmitting && (
+            <div style={{ marginTop: '14px' }}>
+              <AgentThinking message="Supervisor Agent is diagnosing failure & verifying Policy Gate..." />
+            </div>
+          )}
         </form>
       </div>
 
