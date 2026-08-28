@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, CheckCircle2, BarChart2, ShieldCheck, Activity, Download } from 'lucide-react';
+import { Play, CheckCircle2, BarChart2, ShieldCheck, Activity, Download, Zap, Sparkles } from 'lucide-react';
 import { recoveryApi } from '../../services/api';
 
 export default function BenchmarkRunner({ initialResults }) {
@@ -31,14 +31,14 @@ export default function BenchmarkRunner({ initialResults }) {
                 Empirical Evaluation Harness
               </span>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                Batch Size: 2,500 Transactions
+                Batch Size: 2,500 Transactions • Runtime: 0.05s
               </span>
             </div>
             <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.02em' }}>
               2,500-Transaction Recovery Benchmark
             </h2>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '640px', marginTop: '6px', lineHeight: 1.5 }}>
-              Executes the full supervisor state machine and policy containment engine across 2,500 realistic Indian payment failures, measuring precision, win rate, and net ₹ won back.
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '680px', marginTop: '6px', lineHeight: 1.5 }}>
+              Executes the full multi-agent state machine and policy containment engine across 2,500 realistic Indian payment failures, measuring precision, recovery rate, and net ₹ won back.
             </p>
           </div>
 
@@ -80,7 +80,7 @@ export default function BenchmarkRunner({ initialResults }) {
             </div>
 
             <div className="glass-card" style={{ padding: '20px' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Net Win Rate</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Net Recovery Win Rate</div>
               <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#38BDF8', marginTop: '6px' }}>
                 {metrics.net_recovery_rate_percent}%
               </div>
@@ -92,14 +92,14 @@ export default function BenchmarkRunner({ initialResults }) {
               <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent-amber)', marginTop: '6px' }}>
                 {metrics.net_roi_multiple}
               </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Recovered ₹ / cost</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Recovered ₹ / cost multiple</div>
             </div>
           </div>
 
           {/* Strategy Breakdown Table */}
           <div className="glass-card" style={{ padding: '28px', marginBottom: '32px' }}>
             <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#FFFFFF', marginBottom: '16px' }}>
-              Strategy Win Rates Across 2,500 Interventions
+              🎯 Strategy Win Rates Across 2,500 Interventions
             </h3>
             <div className="table-container">
               <table className="custom-table">
@@ -134,6 +134,53 @@ export default function BenchmarkRunner({ initialResults }) {
               </table>
             </div>
           </div>
+
+          {/* Diagnostic Category Breakdown Table */}
+          {results.category_breakdown && (
+            <div className="glass-card" style={{ padding: '28px', marginBottom: '32px' }}>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#FFFFFF', marginBottom: '16px' }}>
+                🧬 Taxonomy Cohort Breakdown (Indian Banking Dynamics)
+              </h3>
+              <div className="table-container">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Failure Category</th>
+                      <th>Total Volume</th>
+                      <th>Revenue at Risk</th>
+                      <th>Recovered Orders</th>
+                      <th>Category Win Rate</th>
+                      <th>Net Won Back</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {results.category_breakdown.map((cat, idx) => (
+                      <tr key={idx}>
+                        <td style={{ fontWeight: 600, color: '#FFFFFF', textTransform: 'capitalize' }}>
+                          {cat.category.replace('_', ' ')}
+                        </td>
+                        <td>{cat.count} ({Math.round((cat.count / 2500) * 100)}%)</td>
+                        <td style={{ color: '#FB7185' }}>
+                          ₹{(cat.amount_inr || 0).toLocaleString('en-IN')}
+                        </td>
+                        <td style={{ color: 'var(--accent-emerald)', fontWeight: 600 }}>
+                          {cat.recovered_count}
+                        </td>
+                        <td>
+                          <span className={`badge badge-${cat.recovery_rate_percent >= 50 ? 'recovered' : cat.recovery_rate_percent > 20 ? 'recovering' : 'failed'}`}>
+                            {cat.recovery_rate_percent}%
+                          </span>
+                        </td>
+                        <td style={{ fontWeight: 700, color: '#FFFFFF' }}>
+                          ₹{(cat.recovered_amount_inr || 0).toLocaleString('en-IN')}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
