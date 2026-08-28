@@ -24,21 +24,19 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Validate Python Syntax & AST Compilation
+      - name: Validate Python Syntax & Bytecode Compilation
         run: |
-          python -m py_compile $(find backend/app -name "*.py")
-          echo "All Python backend modules compiled with 0 syntax errors."
+          python -m compileall backend/app
+          echo "✅ All Python backend modules compiled with 0 syntax errors."
 
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Validate Frontend Package Integrity
+      - name: Validate Frontend Configuration Integrity
         run: |
-          cd frontend
-          npm pkg fix --dry-run
-          echo "Frontend package.json integrity verified."
+          node -e "JSON.parse(require('fs').readFileSync('frontend/package.json')); console.log('✅ frontend/package.json JSON is valid.');"
 
   secret-guard:
     name: 🛡️ Secret Leak & .gitignore Guard
@@ -50,8 +48,9 @@ jobs:
 
       - name: Check for Uncommitted .env or Secret Files
         run: |
-          if git ls-files | grep -E '\.env$|\.key$|\.pem$'; then
-            echo "❌ ERROR: Detected secret file in Git index!"
+          MATCHES=$(git ls-files | grep -E '\.env$|\.key$|\.pem$' || true)
+          if [ -n "$MATCHES" ]; then
+            echo "❌ ERROR: Detected secret file in Git index: $MATCHES"
             exit 1
           else
             echo "✅ Verified: Zero secret files tracked in Git."
