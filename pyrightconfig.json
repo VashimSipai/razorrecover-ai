@@ -1,8 +1,9 @@
 {
-  "venvPath": "${workspaceFolder}/backend",
+  "venvPath": "/Users/vashimsipai/Desktop/Razorpay-Internship/backend",
   "venv": "venv",
   "extraPaths": [
-    "${workspaceFolder}/backend"
+    "/Users/vashimsipai/Desktop/Razorpay-Internship/backend",
+    "/Users/vashimsipai/Desktop/Razorpay-Internship/backend/venv/lib/python3.12/site-packages"
   ],
   "include": [
     "backend"

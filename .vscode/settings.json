@@ -1,9 +1,11 @@
 {
-  "python.defaultInterpreterPath": "${workspaceFolder}/backend/venv/bin/python",
+  "python.defaultInterpreterPath": "/Users/vashimsipai/Desktop/Razorpay-Internship/backend/venv/bin/python",
   "python.analysis.extraPaths": [
-    "${workspaceFolder}/backend"
+    "/Users/vashimsipai/Desktop/Razorpay-Internship/backend",
+    "/Users/vashimsipai/Desktop/Razorpay-Internship/backend/venv/lib/python3.12/site-packages"
   ],
   "python.autoComplete.extraPaths": [
-    "${workspaceFolder}/backend"
+    "/Users/vashimsipai/Desktop/Razorpay-Internship/backend",
+    "/Users/vashimsipai/Desktop/Razorpay-Internship/backend/venv/lib/python3.12/site-packages"
   ]
 }
