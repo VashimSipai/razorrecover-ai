@@ -29,7 +29,7 @@ class RecoveryActionResponse(BaseModel):
         from_attributes = True
 
 class HITLApprovalAction(BaseModel):
-    queue_id: str
+    queue_id: Optional[str] = None
     action: str = Field(description="'approve', 'modify', or 'reject'")
     modified_strategy: Optional[str] = None
     modified_amount_paise: Optional[int] = None
