@@ -2,7 +2,7 @@
 
 > **Official Razorpay AI Buildathon Submission (Track 03: AI Revenue Recovery)**  
 > Built by: B.Tech Computer Engineering AI Builder  
-> Stack: **FastAPI + LangGraph State Machines + Gemini 2.5 Flash + React (Vite) + Razorpay API**
+> Stack: **FastAPI + LangGraph State Machines + Gemini 2.5 Flash + React (Vite) + Razorpay SDK**
 
 [![CI & Evaluation](https://github.com/vashimsipai/razorrecover-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/vashimsipai/razorrecover-ai/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
@@ -52,27 +52,37 @@ Revenue loss in modern digital commerce rarely happens in one clean step. A paym
                                     └───────────┬────────────┘
                                                 │
                                                 ▼
-                               ┌────────────────────────────────┐
-                               │ 🧠 Multi-Agent Supervisor       │
-                               │   • Diagnostic Classifier Agent │
-                               │   • Recovery Scorer Agent       │
-                               │   • Strategy Recommender Agent  │
-                               └────────────────┬───────────────┘
+                                ┌────────────────────────────────┐
+                                │ 🧠 Multi-Agent Supervisor       │
+                                │   • Diagnostic Classifier Agent │
+                                │   • Recovery Scorer Agent       │
+                                │   • Strategy Recommender Agent  │
+                                └────────────────┬───────────────┘
                                                 │
                                                 ▼
-                               ┌────────────────────────────────┐
-                               │ 🛡️ Deterministic Policy Gate   │
-                               │    (Caps, Cooldowns, Limits)   │
-                               └────────┬───────────────┬───────┘
-                                        │               │
-                            High Value (>₹50k)          Approved
-                                        │               │
-                                        ▼               ▼
-                               ┌────────────────┐ ┌────────────────┐
-                               │ ⏸️ HITL Modal   │ │ ⚡ Dispatcher │
-                               │ (Manual Review)│ │ (Razorpay SDK) │
-                               └────────────────┘ └────────────────┘
+                                ┌────────────────────────────────┐
+                                │ 🛡️ Deterministic Policy Gate   │
+                                │    (Caps, Cooldowns, Limits)   │
+                                └────────┬───────────────┬───────┘
+                                         │               │
+                             High Value (≥₹50k)          Approved
+                                         │               │
+                                         ▼               ▼
+                                ┌────────────────┐ ┌────────────────┐
+                                │ ⏸️ HITL Modal   │ │ ⚡ Dispatcher │
+                                │ (Manual Review)│ │ (Razorpay SDK) │
+                                └────────────────┘ └────────────────┘
 ```
+
+---
+
+## 📚 Technical Documentation
+
+- 📘 [**System Architecture Blueprint**](docs/ARCHITECTURE.md) — Multi-agent supervisor pattern, sequence flows, and database models.
+- 🧠 [**AI Agent Design & Safety Model**](docs/AI_AGENT_DESIGN.md) — Specialized agent roles, ReAct reasoning loops, and deterministic guardrails.
+- 🔌 [**Razorpay API Mapping & Taxonomy**](docs/RAZORPAY_API_MAPPING.md) — 20+ Razorpay error codes mapped to recovery strategies.
+- 📊 [**2,500 Empirical Benchmark Report**](docs/BENCHMARK_REPORT.md) — Measured ₹1.78 Cr won back, 52.51% net win rate, and 28,628x Net ROI.
+- ❓ [**Technical Design Decisions & FAQ**](docs/FAQ.md) — Comprehensive architectural Q&A.
 
 ---
 
@@ -86,12 +96,12 @@ Revenue loss in modern digital commerce rarely happens in one clean step. A paym
 
 ### 1. Clone & Configure
 ```bash
-git clone https://github.com/YOUR_USERNAME/razorrecover-ai.git
+git clone https://github.com/vashimsipai/razorrecover-ai.git
 cd razorrecover-ai
 
 # Copy environment template
 cp backend/.env.example backend/.env
-# Add your RAZORPAY_KEY_ID and GOOGLE_API_KEY to backend/.env
+# Add your optional RAZORPAY_KEY_ID and GOOGLE_API_KEY to backend/.env
 ```
 
 ### 2. Setup & Seed Database
@@ -109,7 +119,7 @@ make dev-backend
 make dev-frontend
 ```
 
-Open `http://localhost:5173` to explore the Recovery Dashboard!
+Open `http://localhost:5173` to explore the Recovery Command Center!
 
 ---
 
@@ -119,4 +129,9 @@ Run the benchmark evaluation over 2,500 transactions:
 ```bash
 make benchmark
 ```
-Outputs precision, recall, false-intervention rates, and net ₹ recovered across all 6 recovery strategies.
+Outputs precision, recall, false-intervention rates, and net ₹ recovered across all recovery strategies.
+
+---
+
+## 📄 License
+This project is licensed under the [MIT License](LICENSE).
