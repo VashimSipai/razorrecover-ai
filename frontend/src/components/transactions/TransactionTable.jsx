@@ -57,7 +57,7 @@ export default function TransactionTable({ transactions = [], total = 0, onRefre
               <th>Error Code</th>
               <th>P(Recovery)</th>
               <th>Status</th>
-              <th>Action</th>
+              <th style={{ minWidth: '200px' }}>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -104,13 +104,13 @@ export default function TransactionTable({ transactions = [], total = 0, onRefre
                       {status}
                     </span>
                   </td>
-                  <td>
+                  <td style={{ minWidth: '200px', whiteSpace: 'nowrap' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {status === 'failed' && (
                         <button
                           onClick={() => handleRecover(txn.id)}
                           className="btn-primary"
-                          style={{ padding: '6px 10px', fontSize: '0.75rem' }}
+                          style={{ padding: '6px 12px', fontSize: '0.75rem', whiteSpace: 'nowrap' }}
                           disabled={isRecovering}
                         >
                           <Play size={12} /> {isRecovering ? '...' : 'Recover'}
@@ -120,7 +120,7 @@ export default function TransactionTable({ transactions = [], total = 0, onRefre
                       <button
                         onClick={() => handleViewTrace(txn)}
                         className="btn-secondary"
-                        style={{ padding: '6px 10px', fontSize: '0.75rem' }}
+                        style={{ padding: '6px 12px', fontSize: '0.75rem', whiteSpace: 'nowrap' }}
                         title="View LangGraph Agent Reasoning Trace"
                       >
                         <Eye size={12} /> Trace
