@@ -1,0 +1,11 @@
+{
+  "venvPath": "${workspaceFolder}/backend",
+  "venv": "venv",
+  "extraPaths": [
+    "${workspaceFolder}/backend"
+  ],
+  "include": [
+    "backend"
+  ],
+  "pythonVersion": "3.12"
+}
