@@ -45,3 +45,12 @@ Thumbs.db
 .env.*.local
 *.pem
 *.key
+
+# Local Developer & Submission Preparation Notes (Excluded from Public Git)
+implementation_plan*.md
+local_notes/
+docs/PITCH_SCRIPT.md
+docs/INTERVIEW_PREP.md
+*.mp4
+*.mov
+*.webm
