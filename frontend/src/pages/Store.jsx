@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/layout/Header';
-import { ShoppingBag, CreditCard, CheckCircle2, AlertTriangle, ArrowRight, ShieldCheck, Zap, Sparkles, MessageSquare } from 'lucide-react';
+import { ShoppingBag, CreditCard, CheckCircle2, AlertTriangle, ArrowRight, ShieldCheck, Zap, Sparkles, MessageSquare, Flame } from 'lucide-react';
 import { recoveryApi } from '../services/api';
 import CustomerPhoneMockup from '../components/demo/CustomerPhoneMockup';
 
 export default function Store() {
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [customerName, setCustomerName] = useState('Ananya Iyer');
-  const [customerEmail, setCustomerEmail] = useState('ananya.iyer@example.in');
+  const [customerName, setCustomerName] = useState('Pooja Mehta');
+  const [customerEmail, setCustomerEmail] = useState('pooja.mehta@example.in');
   const [customerPhone, setCustomerPhone] = useState('+919876543210');
   const [isProcessing, setIsProcessing] = useState(false);
   const [liveRecoveryResult, setLiveRecoveryResult] = useState(null);
@@ -19,7 +19,9 @@ export default function Store() {
     script.async = true;
     document.body.appendChild(script);
     return () => {
-      document.body.removeChild(script);
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
     };
   }, []);
 
@@ -50,13 +52,40 @@ export default function Store() {
     }
   ];
 
+  // 1-Click Instant Failure Simulator (Guaranteed to work 100% offline or online)
+  const handleSimulateInstantFailure = async (product, errorCode = "GATEWAY_ERROR_INSUFFICIENT_FUNDS") => {
+    setSelectedProduct(product);
+    setIsProcessing(true);
+    setLiveRecoveryResult(null);
+
+    try {
+      const failureData = await recoveryApi.reportStorePaymentFailure({
+        razorpay_payment_id: `pay_demo_${Date.now()}`,
+        razorpay_order_id: `order_${Date.now()}`,
+        customer_name: customerName,
+        customer_email: customerEmail,
+        customer_phone: customerPhone,
+        amount_inr: product.amount_inr,
+        payment_method: product.amount_inr >= 50000 ? "card" : "upi",
+        error_code: errorCode,
+        error_source: "gateway",
+        error_reason: "Payment failure intercepted during checkout"
+      });
+
+      setLiveRecoveryResult(failureData);
+    } catch (err) {
+      console.error("Simulation error:", err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleStartCheckout = async (product) => {
     setSelectedProduct(product);
     setIsProcessing(true);
     setLiveRecoveryResult(null);
 
     try {
-      // 1. Create real order on backend
       const orderData = await recoveryApi.createStoreOrder({
         product_name: product.name,
         amount_inr: product.amount_inr,
@@ -65,7 +94,6 @@ export default function Store() {
         customer_phone: customerPhone
       });
 
-      // 2. Open Razorpay Standard Checkout modal
       const options = {
         key: orderData.key_id,
         amount: orderData.amount_paise,
@@ -87,63 +115,29 @@ export default function Store() {
         },
         modal: {
           ondismiss: async function () {
-            // Intercept checkout dismissal / failure simulation
-            const failureData = await recoveryApi.reportStorePaymentFailure({
-              razorpay_payment_id: `pay_chk_${Date.now()}`,
-              razorpay_order_id: orderData.order_id,
-              customer_name: customerName,
-              customer_email: customerEmail,
-              customer_phone: customerPhone,
-              amount_inr: product.amount_inr,
-              payment_method: "upi",
-              error_code: "BAD_REQUEST_PAYMENT_CANCELLED_BY_CUSTOMER",
-              error_source: "customer",
-              error_reason: "Customer dropped off at OTP / 3DS authorization stage"
-            });
-            setLiveRecoveryResult(failureData);
-            setIsProcessing(false);
+            await handleSimulateInstantFailure(product, "BAD_REQUEST_PAYMENT_CANCELLED_BY_CUSTOMER");
           }
         }
       };
 
       if (window.Razorpay) {
-        const rzp = new window.Razorpay(options);
-        rzp.on('payment.failed', async function (response) {
-          const failureData = await recoveryApi.reportStorePaymentFailure({
-            razorpay_payment_id: response.error.metadata.payment_id || `pay_chk_${Date.now()}`,
-            razorpay_order_id: orderData.order_id,
-            customer_name: customerName,
-            customer_email: customerEmail,
-            customer_phone: customerPhone,
-            amount_inr: product.amount_inr,
-            payment_method: response.error.source === 'gateway' ? 'card' : 'upi',
-            error_code: response.error.code || 'BAD_REQUEST_PAYMENT_TIMED_OUT',
-            error_source: response.error.source || 'gateway',
-            error_reason: response.error.description || 'Payment failed during checkout'
+        try {
+          const rzp = new window.Razorpay(options);
+          rzp.on('payment.failed', async function (response) {
+            await handleSimulateInstantFailure(product, response.error.code || "BAD_REQUEST_PAYMENT_TIMED_OUT");
           });
-          setLiveRecoveryResult(failureData);
-          setIsProcessing(false);
-        });
-        rzp.open();
+          rzp.open();
+        } catch (e) {
+          console.warn("Razorpay open failed, falling back to direct failure simulation:", e);
+          await handleSimulateInstantFailure(product, "GATEWAY_ERROR_INSUFFICIENT_FUNDS");
+        }
       } else {
-        // Fallback simulation
-        const failureData = await recoveryApi.reportStorePaymentFailure({
-          razorpay_payment_id: `pay_chk_${Date.now()}`,
-          razorpay_order_id: orderData.order_id,
-          customer_name: customerName,
-          customer_email: customerEmail,
-          customer_phone: customerPhone,
-          amount_inr: product.amount_inr,
-          payment_method: "card",
-          error_code: "GATEWAY_ERROR_INSUFFICIENT_FUNDS",
-          error_source: "customer",
-          error_reason: "Card issuer declined transaction due to insufficient balance"
-        });
-        setLiveRecoveryResult(failureData);
-        setIsProcessing(false);
+        await handleSimulateInstantFailure(product, "GATEWAY_ERROR_INSUFFICIENT_FUNDS");
       }
     } catch (err) {
-      console.error("Checkout error:", err);
+      console.error("Checkout initiation error:", err);
+      await handleSimulateInstantFailure(product, "GATEWAY_ERROR_INSUFFICIENT_FUNDS");
+    } finally {
       setIsProcessing(false);
     }
   };
@@ -152,15 +146,15 @@ export default function Store() {
     <div className="main-content">
       <Header
         title="Live Merchant Store & Customer Phone Experience"
-        subtitle="Trigger a payment failure in Razorpay Checkout and watch the customer's phone receive the WhatsApp recovery nudge live"
+        subtitle="Trigger a payment failure and watch the customer's phone receive the WhatsApp recovery nudge live"
       />
 
       <div className="page-wrapper">
         {/* Customer Prefill Configuration Card */}
-        <div className="glass-card" style={{ padding: '18px 24px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
+        <div className="glass-card" style={{ padding: '16px 24px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
           <div>
             <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#FFFFFF' }}>
-              👤 Customer Session (Prefilled into Razorpay Checkout)
+              👤 Customer Session (Prefilled on Checkout)
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
               {customerName} • {customerEmail} • {customerPhone}
@@ -171,23 +165,23 @@ export default function Store() {
               type="text"
               value={customerName}
               onChange={e => setCustomerName(e.target.value)}
-              placeholder="Name"
+              placeholder="Customer Name"
               className="input-field"
-              style={{ width: '130px', padding: '6px 10px', fontSize: '0.75rem' }}
+              style={{ width: '140px', padding: '6px 10px', fontSize: '0.75rem' }}
             />
             <input
               type="text"
               value={customerPhone}
               onChange={e => setCustomerPhone(e.target.value)}
-              placeholder="Phone"
+              placeholder="Phone Number"
               className="input-field"
-              style={{ width: '130px', padding: '6px 10px', fontSize: '0.75rem' }}
+              style={{ width: '140px', padding: '6px 10px', fontSize: '0.75rem' }}
             />
           </div>
         </div>
 
         {/* Store Products & Virtual Phone Split Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '28px', alignItems: 'flex-start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 340px', gap: '28px', alignItems: 'flex-start' }}>
           {/* Left Column: Products & Telemetry */}
           <div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '18px', marginBottom: '24px' }}>
@@ -198,7 +192,7 @@ export default function Store() {
                       <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '2px 8px', borderRadius: '9999px', background: `${prod.badgeColor}22`, color: prod.badgeColor, border: `1px solid ${prod.badgeColor}44` }}>
                         {prod.badge}
                       </span>
-                      <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF' }}>
+                      <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#FFFFFF' }}>
                         ₹{prod.amount_inr.toLocaleString('en-IN')}
                       </div>
                     </div>
@@ -211,20 +205,34 @@ export default function Store() {
                     </p>
                   </div>
 
-                  <button
-                    onClick={() => handleStartCheckout(prod)}
-                    className="btn-primary"
-                    style={{ width: '100%', justifyContent: 'center', padding: '10px', fontSize: '0.8rem' }}
-                    disabled={isProcessing}
-                  >
-                    <CreditCard size={14} />
-                    <span>{isProcessing && selectedProduct?.id === prod.id ? 'Opening Modal...' : 'Pay with Razorpay Modal'}</span>
-                  </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {/* Primary Trigger Button */}
+                    <button
+                      onClick={() => handleSimulateInstantFailure(prod, prod.amount_inr >= 50000 ? "GATEWAY_ERROR_TRANSACTION_LIMIT_EXCEEDED" : "GATEWAY_ERROR_INSUFFICIENT_FUNDS")}
+                      className="btn-primary"
+                      style={{ width: '100%', justifyContent: 'center', padding: '10px', fontSize: '0.8rem' }}
+                      disabled={isProcessing}
+                    >
+                      <Zap size={14} />
+                      <span>{isProcessing && selectedProduct?.id === prod.id ? 'Executing AI Engine...' : '⚡ Trigger Payment Failure & Nudge'}</span>
+                    </button>
+
+                    {/* Secondary Razorpay Modal Button */}
+                    <button
+                      onClick={() => handleStartCheckout(prod)}
+                      className="btn-secondary"
+                      style={{ width: '100%', justifyContent: 'center', padding: '8px', fontSize: '0.75rem' }}
+                      disabled={isProcessing}
+                    >
+                      <CreditCard size={12} />
+                      <span>Open Razorpay Checkout Popup</span>
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* Live Autonomous Recovery Card */}
+            {/* Live Autonomous Recovery Diagnostic Telemetry */}
             {liveRecoveryResult && (
               <div className="glass-card glass-card-glow" style={{ padding: '24px', border: '1px solid rgba(99, 102, 241, 0.4)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
@@ -256,20 +264,32 @@ export default function Store() {
                     </div>
                   </div>
                 </div>
+
+                {liveRecoveryResult.policy_result === 'paused_hitl' && (
+                  <div style={{ marginTop: '14px', padding: '10px 14px', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '8px', fontSize: '0.75rem', color: '#FBBF24', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <AlertTriangle size={16} />
+                    <span>This high-value order (≥ ₹50,000) was paused by LangGraph. Go to <strong>HITL Approvals</strong> in the sidebar to review and approve!</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
 
-          {/* Right Column: Virtual Customer Phone Device */}
+          {/* Right Column: Virtual Customer Smartphone Mockup */}
           <div>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              📱 Customer's Smartphone
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                📱 Customer's Phone
+              </div>
+              <span className="badge badge-recovered" style={{ fontSize: '0.65rem' }}>
+                WhatsApp Live
+              </span>
             </div>
+
             <CustomerPhoneMockup
               notification={liveRecoveryResult}
               customerName={customerName}
               onRecoveryComplete={() => {
-                // Trigger live status update
                 if (liveRecoveryResult) {
                   setLiveRecoveryResult({
                     ...liveRecoveryResult,
