@@ -1,0 +1,162 @@
+{
+  "categories": {
+    "TRANSIENT": {
+      "name": "Transient Gateway & Network Errors",
+      "description": "Temporary glitches, network timeouts, or intermediary bank server downtime. Safe to retry automatically.",
+      "retry_safe": true,
+      "base_recovery_probability": 0.82,
+      "optimal_strategy": "smart_retry",
+      "recommended_delay_hours": 4,
+      "codes": [
+        {
+          "code": "BAD_REQUEST_PAYMENT_TIMED_OUT",
+          "source": "gateway",
+          "reason": "Payment request timed out at gateway level",
+          "recovery_probability": 0.85
+        },
+        {
+          "code": "GATEWAY_ERROR",
+          "source": "gateway",
+          "reason": "Gateway encountered an internal error during processing",
+          "recovery_probability": 0.80
+        },
+        {
+          "code": "GATEWAY_ERROR_DEBIT_FAILED",
+          "source": "gateway",
+          "reason": "Debit request to issuing bank timed out or failed temporarily",
+          "recovery_probability": 0.78
+        },
+        {
+          "code": "GATEWAY_ERROR_UNKNOWN_ERROR",
+          "source": "gateway",
+          "reason": "Unknown bank gateway communication error",
+          "recovery_probability": 0.75
+        }
+      ]
+    },
+    "SOFT_DECLINE": {
+      "name": "Soft Declines & Balance Limits",
+      "description": "Insufficient customer balance or daily velocity limits. Balance will replenish (e.g. salary window, next day).",
+      "retry_safe": true,
+      "base_recovery_probability": 0.58,
+      "optimal_strategy": "delayed_retry_or_alternate_method",
+      "recommended_delay_hours": 24,
+      "codes": [
+        {
+          "code": "GATEWAY_ERROR_INSUFFICIENT_FUNDS",
+          "source": "customer",
+          "reason": "Customer account does not have sufficient balance",
+          "recovery_probability": 0.62
+        },
+        {
+          "code": "GATEWAY_ERROR_TRANSACTION_LIMIT_EXCEEDED",
+          "source": "customer",
+          "reason": "Customer has exceeded their single/daily UPI or card transaction limit",
+          "recovery_probability": 0.55
+        },
+        {
+          "code": "BAD_REQUEST_PAYMENT_ACCOUNT_WITHDRAWAL_LIMIT_EXCEEDED",
+          "source": "customer",
+          "reason": "Bank account daily withdrawal ceiling reached",
+          "recovery_probability": 0.52
+        }
+      ]
+    },
+    "AUTHENTICATION_FAILURE": {
+      "name": "Authentication & Drop-off Failures",
+      "description": "OTP expired, 3D-Secure drop-off, or customer cancellation. High friction; customer needs an alternate payment link.",
+      "retry_safe": false,
+      "base_recovery_probability": 0.45,
+      "optimal_strategy": "payment_link_alternate_method",
+      "recommended_delay_hours": 0,
+      "codes": [
+        {
+          "code": "AUTHENTICATION_FAILED_3DS",
+          "source": "customer",
+          "reason": "3D Secure OTP verification failed or timed out",
+          "recovery_probability": 0.48
+        },
+        {
+          "code": "BAD_REQUEST_PAYMENT_CANCELLED_BY_CUSTOMER",
+          "source": "customer",
+          "reason": "Customer intentionally cancelled or abandoned the checkout modal",
+          "recovery_probability": 0.42
+        },
+        {
+          "code": "BAD_REQUEST_PAYMENT_OTP_EXPIRED",
+          "source": "customer",
+          "reason": "OTP expired before customer entered it",
+          "recovery_probability": 0.50
+        },
+        {
+          "code": "BAD_REQUEST_PAYMENT_OTP_INCORRECT",
+          "source": "customer",
+          "reason": "Customer entered incorrect OTP maximum allowed times",
+          "recovery_probability": 0.38
+        }
+      ]
+    },
+    "HARD_DECLINE": {
+      "name": "Hard Declines & Security Blocks",
+      "description": "Invalid card numbers, lost/stolen card blocks, or bank fraud blocks. DO NOT RETRY without customer providing new method.",
+      "retry_safe": false,
+      "base_recovery_probability": 0.08,
+      "optimal_strategy": "escalate_or_alternate_method",
+      "recommended_delay_hours": 0,
+      "codes": [
+        {
+          "code": "BAD_REQUEST_CARD_INVALID",
+          "source": "customer",
+          "reason": "Card number or expiry date is invalid",
+          "recovery_probability": 0.10
+        },
+        {
+          "code": "GATEWAY_ERROR_CARD_BLOCKED",
+          "source": "customer",
+          "reason": "Card has been reported lost, stolen, or blocked by issuer",
+          "recovery_probability": 0.05
+        },
+        {
+          "code": "BAD_REQUEST_PAYMENT_DECLINED_BY_BANK_DUE_TO_RISK",
+          "source": "gateway",
+          "reason": "Issuing bank fraud detection flagged and rejected the transaction",
+          "recovery_probability": 0.05
+        },
+        {
+          "code": "BAD_REQUEST_CARD_EXPIRED",
+          "source": "customer",
+          "reason": "Card has expired",
+          "recovery_probability": 0.12
+        }
+      ]
+    },
+    "MANDATE_FAILURE": {
+      "name": "Recurring Mandate / Autopay Failures",
+      "description": "UPI Autopay, e-NACH, or card recurring mandate execution failed. Can be sequenced with pre-debit notifications.",
+      "retry_safe": true,
+      "base_recovery_probability": 0.68,
+      "optimal_strategy": "mandate_retry_sequencer",
+      "recommended_delay_hours": 48,
+      "codes": [
+        {
+          "code": "MANDATE_EXECUTION_FAILED",
+          "source": "gateway",
+          "reason": "Recurring mandate execution failed on scheduled date",
+          "recovery_probability": 0.70
+        },
+        {
+          "code": "BAD_REQUEST_MANDATE_NOT_ACKNOWLEDGED",
+          "source": "gateway",
+          "reason": "Customer bank did not acknowledge the mandate presentation",
+          "recovery_probability": 0.65
+        },
+        {
+          "code": "BAD_REQUEST_MANDATE_CUSTOMER_ACCOUNT_SUSPENDED",
+          "source": "customer",
+          "reason": "Customer bank account is inactive or frozen for autopay",
+          "recovery_probability": 0.20
+        }
+      ]
+    }
+  }
+}
