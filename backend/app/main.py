@@ -13,6 +13,8 @@ from app.api.routes_approvals import router as approvals_router
 from app.api.routes_transactions import router as transactions_router
 from app.api.routes_policies import router as policies_router
 from app.api.routes_simulator import router as simulator_router
+from app.api.routes_benchmark import router as benchmark_router
+from app.api.routes_analytics import router as analytics_router
 
 # Configure logger
 logging.basicConfig(
@@ -52,6 +54,8 @@ app.include_router(approvals_router, prefix="/api")
 app.include_router(transactions_router, prefix="/api")
 app.include_router(policies_router, prefix="/api")
 app.include_router(simulator_router, prefix="/api")
+app.include_router(benchmark_router, prefix="/api")
+app.include_router(analytics_router, prefix="/api")
 
 @app.get("/")
 async def root():
