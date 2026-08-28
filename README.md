@@ -114,12 +114,24 @@ make seed
 ```bash
 # Terminal 1: FastAPI Backend
 make dev-backend
+# → API & Interactive Swagger Docs: http://localhost:8000/docs
 
 # Terminal 2: React Vite Frontend
 make dev-frontend
+# → React Command Center: http://localhost:5173
 ```
 
-Open `http://localhost:5173` to explore the Recovery Command Center!
+---
+
+### 🐳 Run with Docker (One-Command Launch)
+
+You can spin up the entire system with Docker Compose:
+
+```bash
+docker compose up --build
+```
+- **React Frontend:** [`http://localhost:5173`](http://localhost:5173)
+- **FastAPI Backend & Interactive Swagger API Docs:** [`http://localhost:8000/docs`](http://localhost:8000/docs)
 
 ---
 

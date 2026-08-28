@@ -30,6 +30,14 @@ benchmark:
 	@echo "Running 2,500-transaction empirical recovery benchmark..."
 	cd backend && ./venv/bin/python -m app.data.benchmark_eval
 
+docker-up:
+	@echo "Launching RazorRecover AI with Docker Compose..."
+	docker compose up --build
+
+docker-down:
+	@echo "Stopping Docker containers..."
+	docker compose down
+
 clean:
 	rm -rf backend/__pycache__ backend/app/__pycache__ backend/app/*/__pycache__
 	rm -f backend/*.db backend/*.sqlite3
