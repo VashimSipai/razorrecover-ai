@@ -54,15 +54,18 @@ export default function WebhookSimulator({ onSimulationSuccess }) {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const data = await recoveryApi.simulatePaymentFailure({
-        customer_name: customerName,
-        customer_email: `${customerName.toLowerCase().replace(/\s+/g, '.')}@example.in`,
-        customer_phone: customerPhone,
-        amount_inr: Number(amountInr),
-        payment_method: paymentMethod,
-        error_code: errorCode,
-        auto_recover: true
-      });
+      const [data] = await Promise.all([
+        recoveryApi.simulatePaymentFailure({
+          customer_name: customerName,
+          customer_email: `${customerName.toLowerCase().replace(/\s+/g, '.')}@example.in`,
+          customer_phone: customerPhone,
+          amount_inr: Number(amountInr),
+          payment_method: paymentMethod,
+          error_code: errorCode,
+          auto_recover: true
+        }),
+        new Promise(resolve => setTimeout(resolve, 1200))
+      ]);
       setSimulationResult(data);
       if (onSimulationSuccess) onSimulationSuccess();
     } catch (err) {

@@ -60,18 +60,22 @@ export default function Store() {
     setLiveRecoveryResult(null);
 
     try {
-      const failureData = await recoveryApi.reportStorePaymentFailure({
-        razorpay_payment_id: `pay_demo_${Date.now()}`,
-        razorpay_order_id: `order_${Date.now()}`,
-        customer_name: customerName,
-        customer_email: customerEmail,
-        customer_phone: customerPhone,
-        amount_inr: product.amount_inr,
-        payment_method: product.amount_inr >= 50000 ? "card" : "upi",
-        error_code: errorCode,
-        error_source: "gateway",
-        error_reason: "Payment failure intercepted during checkout"
-      });
+      // Allow visual animation of the agent reasoning loop (1.2 seconds)
+      const [failureData] = await Promise.all([
+        recoveryApi.reportStorePaymentFailure({
+          razorpay_payment_id: `pay_demo_${Date.now()}`,
+          razorpay_order_id: `order_${Date.now()}`,
+          customer_name: customerName,
+          customer_email: customerEmail,
+          customer_phone: customerPhone,
+          amount_inr: product.amount_inr,
+          payment_method: product.amount_inr >= 50000 ? "card" : "upi",
+          error_code: errorCode,
+          error_source: "gateway",
+          error_reason: "Payment failure intercepted during checkout"
+        }),
+        new Promise(resolve => setTimeout(resolve, 1200))
+      ]);
 
       setLiveRecoveryResult(failureData);
     } catch (err) {
