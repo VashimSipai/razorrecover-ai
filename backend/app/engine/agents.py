@@ -108,10 +108,38 @@ def strategist_node(state: RecoveryState) -> Dict[str, Any]:
         delay = 12
         reasoning = f"Default payment link recovery initiated with {int(prob*100)}% recovery likelihood."
 
+    # Optional Live Google Gemini 2.5 Flash Cloud LLM Call
+    llm_reasoning = None
+    if settings.GOOGLE_API_KEY and settings.GOOGLE_API_KEY != "your_google_ai_studio_api_key_here":
+        try:
+            from google import genai
+            client = genai.Client(api_key=settings.GOOGLE_API_KEY)
+            prompt = (
+                f"You are the RazorRecover AI Strategist. A payment failed in India:\n"
+                f"- Category: {cat}\n"
+                f"- Amount: INR {amt_inr:.2f}\n"
+                f"- Method: {state.get('payment_method')}\n"
+                f"- Error Code: {state.get('error_code')}\n"
+                f"- P(Recovery): {int(prob*100)}%\n"
+                f"Explain concisely in 2 sentences why {strategy} is the optimal recovery action."
+            )
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
+            if response and response.text:
+                llm_reasoning = response.text.strip()
+        except Exception as e:
+            # Fallback seamlessly to deterministic heuristics on any error
+            pass
+
+    final_reasoning = llm_reasoning or reasoning
+
     audit_entry = {
         "node": "strategist",
         "strategy": strategy,
-        "reasoning": reasoning,
+        "reasoning": final_reasoning,
+        "llm_enhanced": bool(llm_reasoning),
         "delay_hours": delay,
         "timestamp": datetime.utcnow().isoformat()
     }
@@ -121,7 +149,7 @@ def strategist_node(state: RecoveryState) -> Dict[str, Any]:
     
     return {
         "proposed_strategy": strategy,
-        "agent_reasoning": reasoning,
+        "agent_reasoning": final_reasoning,
         "recommended_delay_hours": delay,
         "audit_trace": current_trace
     }
