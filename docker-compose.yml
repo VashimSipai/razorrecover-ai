@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=sqlite+aiosqlite:///./recovery.db
+      - SYNC_DATABASE_URL=sqlite:///./recovery.db
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID:-rzp_test_mock_key}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET:-mock_secret}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    volumes:
+      - ./backend/recovery.db:/app/recovery.db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
