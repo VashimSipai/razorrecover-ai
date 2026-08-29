@@ -29,11 +29,13 @@ export default function Sidebar({ pendingCount = 0 }) {
       borderRight: '1px solid var(--border-subtle)',
       display: 'flex',
       flexDirection: 'column',
-      minHeight: '100vh',
+      height: '100vh',
       padding: '24px 16px',
       position: 'sticky',
       top: 0,
-      zIndex: 100
+      flexShrink: 0,
+      zIndex: 100,
+      overflowY: 'auto'
     }}>
       {/* Brand Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 8px 24px', borderBottom: '1px solid var(--border-subtle)' }}>
